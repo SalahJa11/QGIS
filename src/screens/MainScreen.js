@@ -42,22 +42,19 @@ export default function LeafyMap() {
   const [marker2, setMarker2] = useState(null);
   const marker1Ref = useRef();
   const marker2Ref = useRef();
-
-  useEffect(() => {
-    async function fetchWeatherForecast() {
-      try {
-        console.log(searchResult.lat, searchResult.lng);
-        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${searchResult.lat}&lon=${searchResult.lng}&exclude=current&appid=${API_KEY}`;
-        const response = await fetch(url);
-        const data = await response.json();
-        console.log("data", data);
-        setForecast(data);
-      } catch (error) {
-        console.log("Error occurred while fetching weather forecast:", error);
-      }
+  async function fetchWeatherForecast() {
+    try {
+      console.log(searchResult.lat, searchResult.lng);
+      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${searchResult.lat}&lon=${searchResult.lng}&exclude=current&appid=${API_KEY}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      console.log("data", data);
+      setForecast(data);
+    } catch (error) {
+      console.log("Error occurred while fetching weather forecast:", error);
     }
-
-    fetchWeatherForecast();
+  }
+  useEffect(() => {
     solveDistance();
   }, [marker1, marker2, searchResult]);
   const handleMarkerClick = (event) => {
@@ -86,6 +83,9 @@ export default function LeafyMap() {
     // map.setView(center, map.getZoom());
     return null;
   }
+  const handleForecast = async () => {
+    fetchWeatherForecast();
+  };
   const handleSearch = async () => {
     try {
       const response = await fetch(
@@ -124,77 +124,93 @@ export default function LeafyMap() {
   customBlueIcon.options.className = "blue-marker-icon"; // Add a class name to apply the filter
 
   return (
-    <div>
-      <h1 className="main-container">Salah Jawabreh & Ali Drawy</h1>
+    <div style={{ height: "100%" }}>
+      <h1 className="main-container">GeoWeatherMap</h1>
       <div className="head-body">
-        <div className="search-container">
-          {!forecast && <div>Loading weather forecast...</div>}
+        <table>
+          <th>
+            <div className="search-container">
+              {searchResult && (
+                <button className="search-button" onClick={handleForecast}>
+                  Get weather forecast
+                </button>
+              )}
+              {/* {!forecast && <div>Loading weather forecast...</div>} */}
 
-          {forecast && (
-            <div>
-              <h2 className="distance-container">Weather Forecast</h2>
-              {/* Access and display the weather data as needed */}
-              {/* For example: */}
-              <p>Temperature: {(forecast.main.temp - 273.15).toFixed(2)}°C</p>
-              <p>Humidity: {forecast.main.humidity}%</p>
-              <p>Wind Speed: {forecast.wind.speed} m/s</p>
-              {/* ... */}
+              {forecast && (
+                <div>
+                  <h2 className="distance-container">Weather Forecast</h2>
+                  {/* Access and display the weather data as needed */}
+                  {/* For example: */}
+                  <p>
+                    Temperature: {(forecast.main.temp - 273.15).toFixed(2)}°C
+                  </p>
+                  <p>Humidity: {forecast.main.humidity}%</p>
+                  <p>Wind Speed: {forecast.wind.speed} m/s</p>
+                  {/* ... */}
+                </div>
+              )}
+
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchTerm}
+                onChange={(event) => {
+                  console.log(event.target.value);
+                  setSearchTerm(event.target.value);
+                }}
+                className="search-input"
+              />
+              <button className="search-button" onClick={handleSearch}>
+                Search
+              </button>
             </div>
-          )}
-
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(event) => {
-              console.log(event.target.value);
-              setSearchTerm(event.target.value);
-            }}
-            className="search-input"
-          />
-          <button className="search-button" onClick={handleSearch}>
-            Search
-          </button>
-        </div>
-
-        <div>
-          <button
-            className="search-button"
-            onClick={() => {
-              distanceMarkersButtonClicked();
-              setDistanceButtonName("Click on map to create markers");
-            }}
-          >
-            {distanceButtonName}
-          </button>
-          <div></div>
-          <text className="search-note">you can drag markers</text>
-        </div>
-        {distance !== 0 && (
-          <h2 className="distance-container">
-            Distance: {distance} kilometers.
-          </h2>
-        )}
-        <button
-          className="clear-button"
-          onClick={() => {
-            setMarker1(null);
-            setMarker2(null);
-            setSearchResult(null);
-            setForecast(null);
-            setDistanceMarkerVisible(false);
-            setSearchTerm("");
-          }}
-        >
-          Clear
-        </button>
+          </th>
+          <th>
+            <div>
+              <button
+                className="search-button"
+                onClick={() => {
+                  distanceMarkersButtonClicked();
+                  setDistanceButtonName("Click on map to create markers");
+                }}
+              >
+                {distanceButtonName}
+              </button>
+              <div></div>
+              <text className="search-note">you can drag markers</text>
+            </div>
+          </th>
+          <th>
+            {distance !== 0 && (
+              <h2 className="distance-container">
+                Distance: {distance} kilometers.
+              </h2>
+            )}
+          </th>
+          <th>
+            <button
+              className="clear-button"
+              onClick={() => {
+                setMarker1(null);
+                setMarker2(null);
+                setSearchResult(null);
+                setForecast(null);
+                setDistanceMarkerVisible(false);
+                setSearchTerm("");
+              }}
+            >
+              Clear
+            </button>
+          </th>
+        </table>
       </div>
-      <div style={{ height: "800px", width: "100%" }}>
+      <div className="map-container">
         <MapContainer
           center={mapCenter}
           zoom={5}
           scrollWheelZoom={true}
-          style={{ height: "800px", width: "100%" }}
+          style={{ height: "740px", width: "100%" }}
           // onClick={handleMarkerClick}
         >
           <MapClickHandler />
