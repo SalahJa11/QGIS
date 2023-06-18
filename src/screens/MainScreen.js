@@ -11,6 +11,7 @@ export default function LeafyMap() {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResult, setSearchResult] = useState(null);
   const [mapCenter, setMapCenter] = useState([31.7683, 35.2137]);
+  const [areaName, setAreaName] = useState("");
   const [distanceMarkerVisible, setDistanceMarkerVisible] = useState(false);
   const defualtButtonName = "Calculate distance between two markers";
   const [distanceButtonName, setDistanceButtonName] =
@@ -96,6 +97,8 @@ export default function LeafyMap() {
       if (data && data.length > 0) {
         const { lat, lon } = data[0];
         setSearchResult({ lat: parseFloat(lat), lng: parseFloat(lon) });
+        setAreaName(searchTerm);
+        setForecast(null);
       } else {
         setSearchResult(null);
         setForecast(null);
@@ -132,14 +135,16 @@ export default function LeafyMap() {
             <div className="search-container">
               {searchResult && (
                 <button className="search-button" onClick={handleForecast}>
-                  Get weather forecast
+                  Get "{areaName}" weather forecast
                 </button>
               )}
               {/* {!forecast && <div>Loading weather forecast...</div>} */}
 
               {forecast && (
                 <div>
-                  <h2 className="distance-container">Weather Forecast</h2>
+                  <h2 className="distance-container">
+                    "{areaName}" Weather Forecast
+                  </h2>
                   {/* Access and display the weather data as needed */}
                   {/* For example: */}
                   <p>
